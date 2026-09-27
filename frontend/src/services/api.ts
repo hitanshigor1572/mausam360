@@ -11,7 +11,22 @@ import {
   PersonaKey
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:8000/api' : '/api');
+function getBaseUrl(): string {
+  const raw = import.meta.env.VITE_API_BASE_URL;
+  if (!raw) {
+    return import.meta.env.DEV ? 'http://localhost:8000/api' : '/api';
+  }
+  let cleaned = raw.trim();
+  if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://') && !cleaned.startsWith('/')) {
+    cleaned = `https://${cleaned}`;
+  }
+  if (!cleaned.endsWith('/api') && !cleaned.includes('/api/')) {
+    cleaned = `${cleaned.replace(/\/+$/, '')}/api`;
+  }
+  return cleaned;
+}
+
+const API_BASE_URL = getBaseUrl();
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
