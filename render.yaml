@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: mausam-api
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: WEATHER_PROVIDER
+        value: live
+      - key: ENV
+        value: production
+      - key: DEBUG
+        value: False
+
+  - type: web
+    name: mausam-ui
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: mausam-api
+          property: host
